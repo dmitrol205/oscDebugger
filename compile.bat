@@ -1,0 +1,1 @@
+pyinstaller --distpath ./ -F oscTest.py
