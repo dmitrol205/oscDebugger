@@ -3,6 +3,7 @@ from tkinter import font as tkFont
 from tkinter.constants import INSERT
 from oscCode import Code
 from oscInstruction import Instruction
+from idlelib.redirector import WidgetRedirector
 
 
 class CodeView(tk.Text):
@@ -23,10 +24,13 @@ class CodeView(tk.Text):
         lmargin2 = em + self.default_font.measure("\u2022 ")
         self.tag_configure("breakpoint", lmargin1=em, lmargin2=lmargin2)
 
-        self.loadedCodes={}
+        #self.loadedCodes={}
         self.currentCode=["",""]
+        self.redirector=WidgetRedirector(self)
+        self.write=self.redirector.register('insert',lambda *args,**kwargs:"break")
+        self.remove=self.redirector.register('delete',lambda *args,**kwargs:"break")
     def insert_bullet(self,index:'str|int'):
-        self.insert(index, f"\u2022 ", "bullet")
+        self.write(index, f"\u2022 ", "bullet")
     def remove_tags(self,tag:str):
         _=self.tag_ranges(tag)
         if len(_)>0:
@@ -49,13 +53,14 @@ class CodeView(tk.Text):
         if inst.ifend:
             self.tag_add('endif',inst.ifend.position[0],inst.ifend.position[1])
     def loadCode(self,code:'Code',breakpoints:'list[Instruction]'=[],ct:str='init',cn:str=''):
-        self.lineEnd=[]
+        #self.lineEnd=[]
         #posupdate=True
         '''if self.currentCode[0]==ct and self.currentCode[1]==cn:
             return
         self.currentCode=[ct,cn]'''
+        self.currentCode=[ct,cn]
         self.winfo_toplevel().title(f"{ct} {cn}")
-        self.delete("1.0","end")
+        self.remove("1.0","end")
         '''if ct in self.loadedCodes:
             if cn in self.loadedCodes[ct]:
                 posupdate=False'''
@@ -64,9 +69,17 @@ class CodeView(tk.Text):
             if i in breakpoints:
                 self.insert_bullet("end")
             else:
-                self.insert("end","  ")
+                self.write("end","  ")
             i.position[0]=self.index("end-1c")
-            self.insert("end",f"{i.reverse}")
+            self.write("end",f"{i.reverse}")
             i.position[1]=self.index(f"end-1c")        
-            self.insert("end","\n")
+            self.write("end","\n")
                 #self.lineEnd.append()
+    def setBreakpoint(self,inst:Instruction):
+        _=self.index(f'{inst.position[0]} linestart')
+        self.remove(_,self.index(f'{_}+2c'))
+        self.insert_bullet(_)
+    def removeBreakpoint(self,inst:Instruction):
+        _=self.index(f'{inst.position[0]} linestart')
+        self.remove(_,self.index(f'{_}+2c'))
+        self.write(_,"  ")

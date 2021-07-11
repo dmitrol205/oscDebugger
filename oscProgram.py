@@ -10,7 +10,8 @@ class Program:
         self.init=False
         self.frame=False
         self.frame_ai=False
-        self.varnames=[]
+        self.varnames=set()
+        self.stringvarnames=set()
         self.constants={}
         self.reducedif=reducedIf
         self.curves:dict[str,list[list[float,float]]]={}
@@ -56,10 +57,13 @@ class Program:
             tokens=dparse(file)
             for i in tokens:
                 if i.type==3:
-                    if i.string.lower() not in self.varnames:
-                        self.varnames.append(i.string.lower())
-                    else:
-                        pass
+                    self.varnames.add(i.string.lower())
+    def loadStringVarNames(self,filename:str):
+        with open(filename,'r') as file:
+            tokens=dparse(file)
+            for i in tokens:
+                if i.type==3:
+                    self.stringvarnames.add(i.string.lower())
     def loadConstants(self,filename:str):
         with open(filename,'r') as file:
             tokens=dparse(file)

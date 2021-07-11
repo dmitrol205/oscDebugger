@@ -98,12 +98,15 @@ class Code():
         while entryPoint and entryPoint.next!=endPoint:
             if entryPoint.id==7:
                 if entryPoint.ifelse!=entryPoint.ifend:
-                    _0=Code.__hasnext(entryPoint.next,entryPoint.ifelse)
-                    if _0:
-                        _0.next=entryPoint.ifend
+                    if entryPoint.next==entryPoint.ifelse:
+                        entryPoint.next=entryPoint.ifend
                     else:
-                        raise Exception("check __fix if")
-                    Code.__fix_if(entryPoint.ifelse.next,entryPoint.ifend)
+                        _0=Code.__hasnext(entryPoint.next,entryPoint.ifelse)
+                        if _0:
+                            _0.next=entryPoint.ifend
+                        else:
+                            raise Exception("check __fix if")
+                        Code.__fix_if(entryPoint.ifelse.next,entryPoint.ifend)
                 Code.__fix_if(entryPoint.next,entryPoint.ifend)
                 entryPoint=entryPoint.ifend
             else:

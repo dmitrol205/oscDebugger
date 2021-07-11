@@ -7,7 +7,7 @@ from loopStack8 import LoopStack8
 import codeView
 
 class Executor:
-    sysvars=[
+    sysvars={
         "timegap",
         "gettime",
         "nosound",
@@ -30,9 +30,9 @@ class Executor:
         "wearlifespan",
         "autoclutch",
         "sunalt"
-    ]
+    }
     #sysvars=[i.lower() for i in sysvars]
-    roadvehicle_varlist=[
+    roadvehicle_varlist={
         "refresh_strings",
         "envir_brightness",
         "streetcond",
@@ -171,7 +171,16 @@ class Executor:
         "trafficpriority",
         "trafficprioritywarningneeded",
         "wearlifespan"
-    ]
+    }
+    roadvehicle_stringvarlist={
+        "ident",
+        "number",
+        "act_route",
+        "act_busstop",
+        "setlineto",
+        "yard",
+        "file_schedule",
+    }
     def __init__(self,program:Program) -> None:
         #self.iset=InstructionSet()
         self.codeView:'codeView.CodeView'=False
@@ -183,7 +192,7 @@ class Executor:
         self.register=Register8()
         self.float_local={}
         self.string_local={}
-        self.breakpoints=[]
+        self.breakpoints=set()
         self.allowbreakpoints=False
         self.ipstack=[]
         self.error={}
@@ -194,14 +203,23 @@ class Executor:
             self.float_local[i]=0.0
         for i in Executor.roadvehicle_varlist:
             self.float_local[i]=0.0
+        for i in program.stringvarnames:
+            self.string_local[i]=''
+        for i in Executor.roadvehicle_stringvarlist:
+            self.string_local[i]=''
         if self.program.init:
             self.ip=self.program.init.entryPoint
         else:
             self.ip=False
-    def setBreakpoint(self,inst:Instruction):
+    def setBreakpoint(self,inst:Instruction,swap:bool=False):
         if inst not in self.breakpoints:
             self.allowbreakpoints=True
-            self.breakpoints.append(inst)
+            self.breakpoints.add(inst)
+            return True
+        else:
+            if swap:
+                self.removeBreakpoint(inst)
+            return False
     def removeBreakpoint(self,inst:Instruction):
         self.breakpoints.remove(inst)
         if len(self.breakpoints)==0:
@@ -211,16 +229,19 @@ class Executor:
         self.updateCodeView()
     def next(self):
         self.ip=self.ip.next
-    def getCode(self):
-        if self.codeType=='macro':
-            return self.program.macros[self.codeName]
-        elif self.codeType=='trigger':
-            return self.program.triggers[self.codeName]
-        elif self.codeType=='init':
+    def getCode(self,ct:str="",cn:str="")->Code:
+        if ct=="" and cn=="":
+            ct=self.codeType
+            cn=self.codeName
+        if ct=='macro':
+            return self.program.macros[cn]
+        elif ct=='trigger':
+            return self.program.triggers[cn]
+        elif ct=='init':
             return self.program.init
-        elif self.codeType=='frame':
+        elif ct=='frame':
             return self.program.frame
-        elif self.codeType=='frame_ai':
+        elif ct=='frame_ai':
             return self.program.frame_ai
         return False
     def updateCodeView(self):

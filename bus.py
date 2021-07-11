@@ -72,7 +72,7 @@ class Bus(object):
         with open(filename,'r') as file:
             tokens=parse(file)
             if not sharedscripts:
-                self.scripts=Program(True)
+                self.scripts=Program(False)
             else: 
                 self.scripts=sharedscripts
             self.models=Models()

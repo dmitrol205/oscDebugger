@@ -2,8 +2,9 @@ import time
 from oscExecutor import Executor
 from bus import Bus
 from codeView import CodeView
-from tkinter import Event, Frame, Menu, Misc, Tk
+from tkinter import Event, Menu, Misc, Tk, filedialog as fd
 from loopStack8View import LoopStack8View
+import gc
 
 class DebuggerView(Tk):
     def __init__(self,*args,**kwargs) -> None:
@@ -27,8 +28,21 @@ class DebuggerView(Tk):
         self.menufile=Menu(self.menu,tearoff=0)
         self.menu.add_cascade(label="File",menu=self.menufile)
         def openFile():
-            pass
+            filetypes = (
+                ('omsi bus', '*.bus'),
+                ('omsi vehicle','*.ovh'),
+                ('omsi scene object','*.sco'),
+            )
+
+            filename = fd.askopenfilename(
+                title='Open a file',
+                initialdir=r'D:\Program Files (x86)\OMSI 2.2.027\Vehicles',
+                filetypes=filetypes)
+            if filename!="":
+                self.loadBus(filename)
         self.menufile.add_command(label="Open...",command=openFile)
+        self.menufile.add_separator()
+        self.menufile.add_command(label="Exit",command=self.quit)
     def loadBus(self,name:str):
         self.bus=Bus(name)
         self.executor=Executor(self.bus.scripts)
@@ -85,9 +99,24 @@ class DebuggerView(Tk):
             except StopIteration:
                 return
             print(f"{(_2-_1):5.2f}",_)
+        def bpsc(_:'Event[Misc]'):
+            _1=self.codeView.index('insert linestart+2c')
+            _2=self.codeView.index('end')
+            if _1==_2:
+                _1=self.codeView.index(f'{_1}-2l+2c')
+            #self.codeView.mark_set('insert',_1)
+            for i in self.executor.getCode(*self.codeView.currentCode):
+                if i.position[0]==_1:
+                    if self.executor.setBreakpoint(i,True):
+                        self.codeView.setBreakpoint(i)
+                    else:
+                        self.codeView.removeBreakpoint(i)
+            #self.codeView.
         self.bind('<KeyPress-F5>',resume)
         self.bind('<KeyPress-F6>',stepin)
         self.bind('<KeyPress-F7>',stepover)
         self.bind('<KeyPress-F8>',stepout)
+        self.bind('<KeyPress-F2>',bpsc)
         stepin(None)
+        gc.collect()
         

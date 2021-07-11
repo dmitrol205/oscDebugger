@@ -134,6 +134,6 @@ def main3():
 def main4():
     #g=Bus(r"D:\Program Files (x86)\OMSI 2.2.027\Vehicles\MB_O305\O305_E2H_84.bus")
     g=DebuggerView("Debugger")
-    g.loadBus(r"D:\Program Files (x86)\OMSI 2.2.027\Vehicles\MB_O305\O305_E2H_84.bus")
+    #g.loadBus(r"D:\Program Files (x86)\OMSI 2.2.027\Vehicles\MB_O305\O305_E2H_84.bus")
     g.mainloop()
 if __name__=='__main__':main4()
