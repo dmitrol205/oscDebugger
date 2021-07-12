@@ -7,7 +7,7 @@ class Register8:
         return self.data[indx]
     def __setitem__(self,indx:int,value:float):
         self.data[indx]=value
-        self.updateView()
+        #self.updateView()
     def attachView(self,view:'loopStack8View.LoopStack8View'):
         self.view=view
         self.updateView()

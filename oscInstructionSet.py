@@ -5,7 +5,7 @@ import oscExecutor
 
 class __InstructionSet(type):
     def __getitem__(cls,inst:Instruction):
-        print('get f'+str(inst.id),inst.reverse)
+        #print('get f'+str(inst.id),inst.reverse)
         if inst.id<100:
             return getattr(InstructionSet,'f'+str(inst.id))
         else:
@@ -257,7 +257,11 @@ class InstructionSet(object,metaclass=__InstructionSet):
         except IndexError:
             self.ip=False
             return
-        self.updateCodeView()
+        #self.updateViews()
+    def f89(self:"oscExecutor.Executor"):#todo
+        #call sys macro
+        self.ip.value
+        self.next()
         #################################
     def f90(self:"oscExecutor.Executor"):
         self.float_stack.push(self.system_variables[self.ip.value])
@@ -280,12 +284,13 @@ class InstructionSet(object,metaclass=__InstructionSet):
     def f96(self:"oscExecutor.Executor"):
         self.float_stack.push(self.program.function(self.ip.value,self.float_stack.pop()))
         self.next()
-    def f97(self:"oscExecutor.Executor"):#todo
-        #self.float_stack.push(self.program.function(self.ip.value,self.float_stack.pop()))
-        self.next()
-    def f98(self:"oscExecutor.Executor"):#todo
+    def f97(self:"oscExecutor.Executor"):#todo#load and play sound
         #self.float_stack.push(self.program.function(self.ip.value,self.float_stack.pop()))
         _=self.string_stack.pop()
+        self.next()
+    def f98(self:"oscExecutor.Executor"):#todo#play sound
+        #self.float_stack.push(self.program.function(self.ip.value,self.float_stack.pop()))
+        
         self.next()
     def f99(self:"oscExecutor.Executor"):
         self.float_stack.push(self.ip.value)

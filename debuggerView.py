@@ -1,3 +1,5 @@
+import threading
+from codePicker import CodePicker
 import time
 from oscExecutor import Executor
 from bus import Bus
@@ -22,6 +24,9 @@ class DebuggerView(Tk):
         self.rowconfigure(0,weight=1)
         #self.rowconfigure(1,weight=1)
         #self.columnconfigure(0,pad=1)
+        self.codePicker=CodePicker(self)
+        self.codePicker.grid(row=0,column=0,sticky='ew')
+        self.codeView.attachCodePicker(self.codePicker)
         self.columnconfigure(1,weight=20)
         self.menu=Menu(self)
         self.configure(menu=self.menu)
@@ -43,6 +48,8 @@ class DebuggerView(Tk):
         self.menufile.add_command(label="Open...",command=openFile)
         self.menufile.add_separator()
         self.menufile.add_command(label="Exit",command=self.quit)
+        self.thread=threading.Thread()
+        self.thread.start()
     def loadBus(self,name:str):
         self.bus=Bus(name)
         self.executor=Executor(self.bus.scripts)
@@ -50,17 +57,23 @@ class DebuggerView(Tk):
         self.executor.float_stack.attachView(self.stacks[0])
         self.executor.string_stack.attachView(self.stacks[1])
         self.executor.register.attachView(self.stacks[2])
+        self.codePicker.loadCodes(self.bus.scripts)
+        self.codePicker.attachExecutor(self.executor)
         self.executor.stepmode=True
         self.execution=self.executor.run()
         def stepin(_:'Event[Misc]'):
+            if self.thread.is_alive():
+                return
             try:
                 _1=time.time()
                 _=next(self.execution)
                 _2=time.time()
             except StopIteration:
                 return
-            print(f"{(_2-_1):5.2f}",_)
+            print(f"{(_2-_1):f}",_)
         def stepover(_:'Event[Misc]'):
+            if self.thread.is_alive():
+                return
             _0=self.executor.ip.next
             if not _0:
                 stepin(_)
@@ -74,8 +87,10 @@ class DebuggerView(Tk):
             except StopIteration:
                 return
             self.executor.removeBreakpoint(_0)
-            print(f"{(_2-_1):5.2f}",_)
+            print(f"{(_2-_1):f}",_)
         def stepout(_:'Event[Misc]'):
+            if self.thread.is_alive():
+                return
             if len(self.executor.ipstack)==0:
                 stepin(_)
                 return
@@ -89,16 +104,22 @@ class DebuggerView(Tk):
             except StopIteration:
                 return
             self.executor.removeBreakpoint(_0)
-            print(f"{(_2-_1):5.2f}",_)
+            print(f"{(_2-_1):f}",_)
         def resume(_:'Event[Misc]'):
-            self.executor.stepmode=False
-            try:
-                _1=time.time()
-                _=next(self.execution)
-                _2=time.time()
-            except StopIteration:
+            if self.thread.is_alive():
                 return
-            print(f"{(_2-_1):5.2f}",_)
+            self.executor.stepmode=False
+            def remote():
+                try:
+                    _1=time.time()
+                    _=next(self.execution)
+                    _2=time.time()
+                except StopIteration:
+                    return
+                print(f"{(_2-_1):f}",_)
+            g=threading.Thread(target=remote)
+            g.setDaemon(True)
+            g.start()
         def bpsc(_:'Event[Misc]'):
             _1=self.codeView.index('insert linestart+2c')
             _2=self.codeView.index('end')
@@ -112,10 +133,13 @@ class DebuggerView(Tk):
                     else:
                         self.codeView.removeBreakpoint(i)
             #self.codeView.
+        def pause(_:'Event[Misc]'):
+            self.executor.stepmode=True
         self.bind('<KeyPress-F5>',resume)
         self.bind('<KeyPress-F6>',stepin)
         self.bind('<KeyPress-F7>',stepover)
         self.bind('<KeyPress-F8>',stepout)
+        self.bind('<KeyPress-F9>',pause)
         self.bind('<KeyPress-F2>',bpsc)
         stepin(None)
         gc.collect()

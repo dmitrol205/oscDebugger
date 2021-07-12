@@ -1,3 +1,4 @@
+import codePicker
 import tkinter as tk
 from tkinter import font as tkFont
 from tkinter.constants import INSERT
@@ -52,6 +53,8 @@ class CodeView(tk.Text):
             self.tag_add('else',inst.ifelse.position[0],inst.ifelse.position[1])
         if inst.ifend:
             self.tag_add('endif',inst.ifend.position[0],inst.ifend.position[1])
+    def isCurrentCode(self,ct:str='init',cn:str=''):
+        return ct==self.currentCode[0] and cn==self.currentCode[1]
     def loadCode(self,code:'Code',breakpoints:'list[Instruction]'=[],ct:str='init',cn:str=''):
         #self.lineEnd=[]
         #posupdate=True
@@ -59,7 +62,9 @@ class CodeView(tk.Text):
             return
         self.currentCode=[ct,cn]'''
         self.currentCode=[ct,cn]
-        self.winfo_toplevel().title(f"{ct} {cn}")
+        if self.codePicker:
+            self.codePicker.setCode(*self.currentCode)
+        #self.winfo_toplevel().title(f"{ct} {cn}")
         self.remove("1.0","end")
         '''if ct in self.loadedCodes:
             if cn in self.loadedCodes[ct]:
@@ -83,3 +88,5 @@ class CodeView(tk.Text):
         _=self.index(f'{inst.position[0]} linestart')
         self.remove(_,self.index(f'{_}+2c'))
         self.write(_,"  ")
+    def attachCodePicker(self,cp:'codePicker.CodePicker'):
+        self.codePicker=cp

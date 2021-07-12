@@ -10,7 +10,7 @@ class LoopStack8:
         self.pointer+=9
         self.pointer%=8
         self.stack[self.pointer]=value
-        self.updateView()
+        #self.updateView()
     def peek(self)->'str|float':
         return self.stack[self.pointer]
     def pop(self)->'str|float':
@@ -18,7 +18,7 @@ class LoopStack8:
         self.stack[self.pointer]=float(0) if type(_).__name__=='float' else ''
         self.pointer+=7
         self.pointer%=8
-        self.updateView()
+        #self.updateView()
         return _
     def __getitem__(self,index:int):
         return self.stack[(self.pointer-index+8)%8]

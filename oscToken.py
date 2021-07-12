@@ -143,8 +143,8 @@ class Token:
         94:'store to string var',
         95:'load from constant',
         96:'call function',
-        97:'play sound',
-        98:'change sound',
+        97:'change and play sound',#or play by given path #todo(check)
+        98:'play sound',
         99:'number',
         100:'load reg0',
         101:'load reg1',

@@ -1,3 +1,4 @@
+import random
 from register8 import Register8
 from oscInstruction import Instruction
 from oscProgram import Program
@@ -226,7 +227,6 @@ class Executor:
             self.allowbreakpoints=False
     def attachCodeView(self,codeView:'codeView.CodeView'):
         self.codeView=codeView
-        self.updateCodeView()
     def next(self):
         self.ip=self.ip.next
     def getCode(self,ct:str="",cn:str="")->Code:
@@ -244,31 +244,42 @@ class Executor:
         elif ct=='frame_ai':
             return self.program.frame_ai
         return False
-    def updateCodeView(self):
-        if self.isalive and self.stepmode and self.codeView:
-            self.codeView.loadCode(self.getCode(),self.breakpoints,self.codeType,self.codeName)
+    def updateViews(self):
+        if self.isalive and self.stepmode:
+            if self.codeView:
+                if not self.codeView.isCurrentCode(self.codeType,self.codeName):
+                    self.codeView.loadCode(self.getCode(),self.breakpoints,self.codeType,self.codeName)
+                if self.ip.id==7:
+                    self.codeView.selectIf(self.ip)
+                else:
+                    self.codeView.selectInstruction(self.ip)
+            self.register.updateView()
+            self.float_stack.updateView()
+            self.string_stack.updateView()
+    def updateFrame(self):
+        self.float_local['timegap']=0.016+random.random()/100;
     def debugOutput(self,text:str,key:str=''):
         print(f"[debug]{key}:{text}")    
     def execute(self,codetype:str,codename:str=""):
         self.codeType=codetype
         self.codeName=codename
-        print(self.codeType,self.codeName)
+        #print(self.codeType,self.codeName)
         self.ip=self.getCode().entryPoint
-        self.updateCodeView()
+        #if self.stepmode:
+            #self.updateViews()
         while self.isalive and self.ip:
             if self.extendedIf and self.ip.id in [8,9]:
                 self.next()
                 continue
             if self.allowbreakpoints and self.ip in self.breakpoints:
                 self.stepmode=True
-                self.updateCodeView()
             if self.stepmode:
+                self.updateViews() 
                 if self.codeView:
-                    if self.ip.id==7:
-                        self.codeView.selectIf(self.ip)
-                    else:
-                        self.codeView.selectInstruction(self.ip)
+                    self.codeView.winfo_toplevel().title("wait")
                 yield self.ip
+                if self.codeView:
+                    self.codeView.winfo_toplevel().title("running")
             _=InstructionSet[self.ip](self)
             if _!=None:
                 yield from _
@@ -281,10 +292,12 @@ class Executor:
         if ai:
             if self.program.frame_ai:
                 while self.isalive:
+                    self.updateFrame()
                     yield from self.execute('frame_ai')    
         else:
             if self.program.frame:
                 while self.isalive:
+                    self.updateFrame()
                     yield from self.execute('frame')
     def stop(self):
         self.isalive=False
