@@ -1,20 +1,25 @@
-name: Python package
+name: Python test
 on: [workflow_dispatch]
+#on:
+#  push:
+#    branches: [ $default-branch ]
 jobs:
   build:
 
-    runs-on: windows-latest
-
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [windows-latest]
+        python-version: [3.6]
+        #exclude:
+        #  - os: windows-latest
+        #    python-version: 3.6
     steps:
-      #- uses: actions/checkout@v2
-      - name: Set up Python 3.6.x
-        uses: actions/setup-python@v2
-        with:
-          # Semantic version range syntax or exact version of a Python version
-          python-version: '3.6.x'
-          # Optional - x64 or x86 architecture, defaults to x64
-          architecture: 'x64'
-
-      # You can test your matrix by printing the current Python version
-      - name: Display Python version
-        run: python -c "import sys; print(sys.version)"
+      - name: update pip
+        run: pip install --upgrade pip
+      - name: load libs
+        run: pip install -r requirements.txt
+      - name: build
+        run: pyinstaller --distpath ./ -F oscTest.py
+    #  - name: build
+    #    run: compile.bat

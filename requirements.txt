@@ -1,0 +1,1 @@
+numpy @ https://download.lfd.uci.edu/pythonlibs/r4tycu3t/cp36/numpy-1.19.5+mkl-cp36-cp36m-win_amd64.whl

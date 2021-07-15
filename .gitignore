@@ -4,6 +4,7 @@
 !/LICENSE
 !/README.md
 !/compile.bat
+!/requirements.txt
 !/.github/
 /.github/workflows/*.yml
 !.github/workflows/build.yml

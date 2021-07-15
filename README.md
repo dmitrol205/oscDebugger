@@ -1,5 +1,5 @@
 # oscDebugger
-
+[![Windows Executable Build](https://github.com/dmitrol205/oscDebugger/actions/workflows/build.yml/badge.svg?branch=dev)](https://github.com/dmitrol205/oscDebugger/actions/workflows/build.yml)
 Window title describe execution state(running/idle)
 
 Keys
