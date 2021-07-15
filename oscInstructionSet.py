@@ -1,4 +1,5 @@
 import math
+from oscSystemMacros import SystemMacros
 from oscInstruction import Instruction
 from random import randint
 import oscExecutor
@@ -28,19 +29,19 @@ class InstructionSet(object,metaclass=__InstructionSet):
     def f9(self:"oscExecutor.Executor"):
         self.next()'''
     def f10(self:"oscExecutor.Executor"):
-        if self.float_stack.pop()==0.0 or self.float_stack.pop()==0.0:
+        if self.float_stack.pop()==float(0) or self.float_stack.pop()==float(0):
             self.float_stack.push(float(0))
         else:
             self.float_stack.push(float(1))
         self.next()
     def f11(self:"oscExecutor.Executor"):
-        if self.float_stack.pop()==0.0 and self.float_stack.pop()==0.0:
+        if self.float_stack.pop()==float(0) and self.float_stack.pop()==float(0):
             self.float_stack.push(float(0))
         else:
             self.float_stack.push(float(1))
         self.next()
     def f12(self:"oscExecutor.Executor"):
-        if self.float_stack.pop()==0.0:
+        if self.float_stack.pop()==float(0):
             self.float_stack.push(float(1))
         else:
             self.float_stack.push(float(0))
@@ -57,7 +58,7 @@ class InstructionSet(object,metaclass=__InstructionSet):
         self.next()
     def f16(self:"oscExecutor.Executor"):
         _=self.float_stack.pop()
-        if _==0.0:
+        if _==float(0):
             self.float_stack.pop()
             self.float_stack.push(float(0))    
         else:
@@ -130,14 +131,16 @@ class InstructionSet(object,metaclass=__InstructionSet):
         self.next()
     def f37(self:"oscExecutor.Executor"):
         _=self.float_stack.pop()
-        _=1. if _>0 else -1. if _<0 else 0.
+        _=1. if _>0 else float(-1) if _<0 else float(0)
         self.float_stack.push(_)
         self.next()
     def f38(self:"oscExecutor.Executor"):
         self.float_stack.push(math.pi)
         self.next()
     def f39(self:"oscExecutor.Executor"):
-        self.float_stack.push(float(randint(0,int(self.float_stack.pop())-1)))
+        _=int(self.float_stack.pop())-1
+        _=float(0) if _<0 else float(randint(0,_))
+        self.float_stack.push(_)
         self.next()
     def f40(self:"oscExecutor.Executor"):
         self.float_stack.push(math.fabs(self.float_stack.pop()))
@@ -210,14 +213,14 @@ class InstructionSet(object,metaclass=__InstructionSet):
         if len(_1)>_2:
             _1=f"{_1[:_2-1]}#"
         else:
-            _1=f"{_1:{_[0]}>{_2}d}"
+            _1=f"{_1:{_[0]}>{_2}}"
         self.string_stack.push(_1)
         self.next()
     def f52(self:"oscExecutor.Executor"):
         try:
             _=float(self.string_stack.pop())
         except ValueError:
-            _='-1'
+            _=float(-1)
         self.float_stack.push(_)
         self.next()
     def f53(self:"oscExecutor.Executor"):        
@@ -260,7 +263,7 @@ class InstructionSet(object,metaclass=__InstructionSet):
         #self.updateViews()
     def f89(self:"oscExecutor.Executor"):#todo
         #call sys macro
-        self.ip.value
+        SystemMacros[self.ip](self)
         self.next()
         #################################
     def f90(self:"oscExecutor.Executor"):

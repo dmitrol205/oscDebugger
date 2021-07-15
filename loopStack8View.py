@@ -9,7 +9,7 @@ class LoopStack8View(Frame):
             self.labels[i].grid(column=0,row=i+1,sticky='w')
         self.values=[Entry(self) for _ in range(8)]
         for i in range(8):
-            self.values[i].insert('end',str(float(0)))
+            #self.values[i].insert('end',str(float(0)))
             self.values[i].grid(column=1,row=i+1,sticky='ew')
         self.columnconfigure(0,weight=0)
         self.columnconfigure(1,weight=1)
@@ -17,5 +17,5 @@ class LoopStack8View(Frame):
         vpointer=0
         for i in self.values:
             i.delete('0','end')
-            i.insert('end',str(data[vpointer]))
+            i.insert('end',repr(data[vpointer]))
             vpointer+=1

@@ -89,6 +89,14 @@ class Token:
         'shadow':90,
         'newcurve':91,
         'pnt':92,
+        'type':93,
+        'fixed':94,
+        'control_cable_front':95,
+        'control_cable_back':96,
+        'boogies':97,
+        'sinus':98,
+        'rail_body_osc':99,
+        'contact_shoe':100,
     }
     revkeywords={v:k for k,v in keywords.items()}
     tags={
