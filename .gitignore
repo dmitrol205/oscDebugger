@@ -1,6 +1,9 @@
 *.*
+/*/
 !/*.py
 !/LICENSE
 !/README.md
 !/compile.bat
-!/build.yml
+!/.github/
+/.github/workflows/*.yml
+!.github/workflows/build.yml
