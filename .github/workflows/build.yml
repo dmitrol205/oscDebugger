@@ -15,10 +15,12 @@ jobs:
         #  - os: windows-latest
         #    python-version: 3.6
     steps:
+      - name: load project
+        uses: actions/checkout@v2
       - name: update pip
         run: pip install --upgrade pip
-      #- name: load libs
-      #  run: pip install -r requirements.txt
+      - name: load libs
+        run: pip install -r requirements.txt
       - name: show dir
         run: cd
       - name: build
