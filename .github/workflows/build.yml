@@ -5,18 +5,25 @@ on: [workflow_dispatch]
 #    branches: [ $default-branch ]
 jobs:
   build:
-
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [windows-latest]
-        python-version: [3.6]
+    runs-on: [windows-latest]
+    #runs-on: ${{ matrix.os }}
+    #strategy:
+      #matrix:
+        #os: [windows-latest]
+        #python-version: [3.6]
         #exclude:
         #  - os: windows-latest
         #    python-version: 3.6
     steps:
       - name: load project
         uses: actions/checkout@v2
+      - name: Set up Python 3.6.x
+        uses: actions/setup-python@v2
+        with:
+          # Semantic version range syntax or exact version of a Python version
+          python-version: '3.6.x'
+          # Optional - x64 or x86 architecture, defaults to x64
+          architecture: 'x64'
       - name: update pip
         run: pip install --upgrade pip
       - name: load libs
