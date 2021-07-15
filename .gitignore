@@ -1,6 +1,6 @@
-/__pycache__/*
-/build/*
-*.exe
-*.spec
-gen.bat
-*.c
+*.*
+!/*.py
+!/LICENSE
+!/README.md
+!/compile.bat
+!/build.yml
