@@ -26,7 +26,7 @@ jobs:
           # Semantic version range syntax or exact version of a Python version
           python-version: '3.6.x'
           # Optional - x64 or x86 architecture, defaults to x64
-          architecture: {{$matrix.arch}}
+          architecture: {{ $matrix.arch }}
       - name: update pip
         run: pip install --upgrade pip
       - name: load libs
