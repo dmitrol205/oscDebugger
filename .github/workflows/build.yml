@@ -19,6 +19,8 @@ jobs:
         run: pip install --upgrade pip
       - name: load libs
         run: pip install -r requirements.txt
+      - name: show dir
+        run: dir
       - name: build
         run: pyinstaller --distpath ./ -F oscTest.py
     #  - name: build
