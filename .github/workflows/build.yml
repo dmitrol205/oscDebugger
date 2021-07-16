@@ -1,24 +1,26 @@
-name: Python test
+name: Python build prerelease
 on: [workflow_dispatch]
 #on:
 #  push:
 #    branches: [ $default-branch ]
 jobs:
-  release-allocate:
-    runs-on: [windows-latest]
+  test:
+    runs-on: windows-latest
     steps:
-      - name: Create Release
-          id: create_release
-          uses: actions/create-release@v1
+      - name: check tag existance
+        uses: mukunku/tag-exists-action@v1.0.0
+          id: checkTag
+          with: 
+            tag: 'v0.1-dev'
           env:
             GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          with:
-            tag_name: ${{ github.ref }}
-            release_name: dev ${{ github.ref }}
-            draft: false
-            prerelease: true
+      - name: run if token exists
+        if: steps.checkTag.outputs.exists
+        run: exit -2
+      - name: run if token don't exists
+        if: steps.checkTag.outputs.exists
+        run: exit -3
   build:
-    needs: release-allocate
     runs-on: [windows-latest]
     #runs-on: ${{ matrix.os }}
     #strategy:
@@ -31,8 +33,9 @@ jobs:
     strategy:
       matrix:
         arch: ['x64','x86']
+        version: ['v0.1.1-dev']
     steps:
-      - name: load project
+      - name: Download project
         uses: actions/checkout@v2
       - name: Set up Python 3.6.x
         uses: actions/setup-python@v2
@@ -41,12 +44,25 @@ jobs:
           python-version: '3.6.x'
           # Optional - x64 or x86 architecture, defaults to x64
           architecture: ${{ matrix.arch }}
-      - name: update pip
+      - name: Retrieve python version
+        id: py
+        run: echo "::set-output name=version::$(python -c "import sys;print(sys.version.split()[0])")""
+      - name: Update pip
         run: pip install --upgrade pip
-      - name: load libs
+      - name: Load libs
         run: pip install -r requirements.txt
-      - name: build
+      - name: Build
         run: pyinstaller --distpath ./ -F oscTest.py
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ matrix.version }}
+          release_name: ${{ matrix.version }} python${{ steps.py.outputs.version }}
+          draft: false
+          prerelease: true
       - name: Upload Release Asset
         id: upload-release-asset 
         uses: actions/upload-release-asset@v1
