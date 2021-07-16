@@ -7,9 +7,10 @@ env:
 #    branches: [ $default-branch ]
 jobs:
   prepare:
-    runs-on: [windows-latest]
+    #runs-on: [windows-latest]
     outputs:
       url: ${{ steps.create_release.outputs.upload_url }}
+      id: ${{ steps.create_release.outputs.id }}
     steps:
       - name: Create Release
         id: create_release
@@ -88,3 +89,14 @@ jobs:
           asset_path: ./oscTest.exe
           asset_name: debugger_${{ matrix.arch }}cp${{ steps.py.outputs.version }}.exe
           asset_content_type: application/octet-stream
+
+  publish:
+    needs: [prepare,build]
+    runs-on: any
+    steps:
+      - name: Publish release
+        uses: StuYarrow/publish-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          id: ${{ needs.prepare.outputs.id }}
