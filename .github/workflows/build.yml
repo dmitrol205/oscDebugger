@@ -8,6 +8,8 @@ env:
 jobs:
   prepare:
     runs-on: [windows-latest]
+    outputs:
+      url: ${{ steps.create_release.outputs.upload_url }}
     steps:
       - name: Create Release
         id: create_release
@@ -19,15 +21,15 @@ jobs:
           release_name: ${{ env.version }} python build
           draft: true
           prerelease: true
-      - name: save link
-        run: echo "${{ steps.create_release.outputs.upload_url }}">./link.txt
-      - name: check link
-        run: type ./link.txt
-      - name: store upload link
-        uses: actions/upload-artifact@v2
-        with:
-          name: my-artifact
-          path: ./link.txt
+      #- name: save link
+      #  run: echo "${{ steps.create_release.outputs.upload_url }}">./link.txt
+      #- name: check link
+      #  run: type ./link.txt
+      #- name: store upload link
+      #  uses: actions/upload-artifact@v2
+      #  with:
+      #    name: my-artifact
+      #    path: ./link.txt
   build:
     needs: [prepare]
     runs-on: [windows-latest]
@@ -54,7 +56,7 @@ jobs:
           architecture: ${{ matrix.arch }}
       - name: Retrieve python version
         id: py
-        run: echo "::set-output name=version::$(python -c \"import sys;print(sys.version.split()[0])\")zz"
+        run: echo ::set-output name=version::$(python -c "import sys;print(sys.version.split()[0])")
       - name: Update pip
         run: pip install --upgrade pip
       - name: Load libs
@@ -63,26 +65,26 @@ jobs:
         run: pyinstaller --distpath ./ -F oscTest.py
       #- name: rename file
       #  run: rename "./oscTest.exe" "./debugger_${{ matrix.arch }}cp${{ steps.py.outputs.version }}.exe"
-      - name: download upload link
-        uses: actions/download-artifact@v2
-        with:
-          name: my-artifact
-      - name: load link
-        id: link
-        run: echo "::set-output name=url::$(type ./link.txt)"
-      - name: Display structure of downloaded files
-        run: |
-          dir
-          cd
-          type ./link.txt
-        working-directory: ./
+      #- name: download upload link
+      #  uses: actions/download-artifact@v2
+      #  with:
+      #    name: my-artifact
+      #- name: load link
+      #  id: link
+      #  run: echo "::set-output name=url::$(type ./link.txt)"
+      #- name: Display structure of downloaded files
+      #  run: |
+      #    dir
+      #    cd
+      #    type ./link.txt
+      #  working-directory: ./
       - name: Upload Release Asset
         id: upload-release-asset 
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.link.outputs.url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          upload_url: ${{ needs.prepare.outputs.url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
           asset_path: ./oscTest.exe
           asset_name: debugger_${{ matrix.arch }}cp${{ steps.py.outputs.version }}.exe
           asset_content_type: application/octet-stream
