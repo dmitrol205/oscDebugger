@@ -1,12 +1,26 @@
 name: Python build prerelease
 #on: [workflow_dispatch]
 env:
-  version: 'v0.1.2-dev'
+  version: 'v0.1.1-dev'
 on:
   push:
     branches: [ $default-branch ]
 jobs:
+  protection:
+    runs-on: ubuntu-latest
+    outputs:
+      status: ${{ steps.checkTag.outputs.exists==false }}
+    steps:
+      - name: check tag existence
+        uses: mukunku/tag-exists-action@v1.0.0
+        id: checkTag
+        with: 
+          tag: ${{ env.version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   prepare:
+    needs: [protection]
+    if: ${{ needs.protection.outputs.status }}
     runs-on: ubuntu-latest
     outputs:
       url: ${{ steps.create_release.outputs.upload_url }}
