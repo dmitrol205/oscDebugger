@@ -20,7 +20,9 @@ jobs:
           draft: false
           prerelease: true
       - name: save link
-        run: echo ${{ steps.create_release.outputs.upload_url }}
+        run: echo "${{ steps.create_release.outputs.upload_url }}">./link.txt
+      - name: check link
+        run: type ./link.txt
       - name: store upload link
         uses: actions/upload-artifact@v2
         with:
