@@ -57,7 +57,7 @@ jobs:
           architecture: ${{ matrix.arch }}
       - name: Retrieve python version
         id: py
-        run: echo ::set-output name=version::$(python -c "import sys;print(sys.version.split()[0])")
+        run: echo "::set-output name=version::$(python -c 'import sys;print(sys.version.split()[0])')"
       - name: Update pip
         run: pip install --upgrade pip
       - name: Load libs
