@@ -9,11 +9,11 @@ jobs:
     steps:
       - name: check tag existance
         uses: mukunku/tag-exists-action@v1.0.0
-          id: checkTag
-          with: 
-            tag: 'v0.1-dev'
-          env:
-            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        id: checkTag
+        with: 
+          tag: 'v0.1-dev'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: run if token exists
         if: steps.checkTag.outputs.exists
         run: exit -2
