@@ -1,26 +1,33 @@
 name: Python build prerelease
 on: [workflow_dispatch]
+env:
+  version: 'v0.1.1-dev'
 #on:
 #  push:
 #    branches: [ $default-branch ]
 jobs:
-  test:
-    runs-on: windows-latest
+  prepare:
+    runs-on: [windows-latest]
     steps:
-      - name: check tag existance
-        uses: mukunku/tag-exists-action@v1.0.0
-        id: checkTag
-        with: 
-          tag: 'v0.1-dev'
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      - name: run if token exists
-        if: steps.checkTag.outputs.exists
-        run: exit -2
-      - name: run if token don't exists
-        if: steps.checkTag.outputs.exists
-        run: exit -3
+        with:
+          tag_name: ${{ env.version }}
+          release_name: ${{ env.version }} python build
+          draft: false
+          prerelease: true
+      - name: save link
+        run: echo ${{ steps.create_release.outputs.upload_url }}
+      - name: store upload link
+        uses: actions/upload-artifact@v2
+        with:
+          name: my-artifact
+          path: ./link.txt
   build:
+    needs: [prepare]
     runs-on: [windows-latest]
     #runs-on: ${{ matrix.os }}
     #strategy:
@@ -33,7 +40,6 @@ jobs:
     strategy:
       matrix:
         arch: ['x64','x86']
-        version: ['v0.1.1-dev']
     steps:
       - name: Download project
         uses: actions/checkout@v2
@@ -46,30 +52,35 @@ jobs:
           architecture: ${{ matrix.arch }}
       - name: Retrieve python version
         id: py
-        run: echo "::set-output name=version::$(python -c "import sys;print(sys.version.split()[0])")""
+        run: echo "::set-output name=version::$(python -c \"import sys;print(sys.version.split()[0])\")zz"
       - name: Update pip
         run: pip install --upgrade pip
       - name: Load libs
         run: pip install -r requirements.txt
       - name: Build
         run: pyinstaller --distpath ./ -F oscTest.py
-      - name: Create Release
-        id: create_release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      #- name: rename file
+      #  run: rename "./oscTest.exe" "./debugger_${{ matrix.arch }}cp${{ steps.py.outputs.version }}.exe"
+      - name: download upload link
+        uses: actions/download-artifact@v2
         with:
-          tag_name: ${{ matrix.version }}
-          release_name: ${{ matrix.version }} python${{ steps.py.outputs.version }}
-          draft: false
-          prerelease: true
+          name: my-artifact
+      - name: load link
+        id: link
+        run: echo "::set-output name=url::$(type ./link.txt)"
+      - name: Display structure of downloaded files
+        run: |
+          dir
+          cd
+          type ./link.txt
+        working-directory: ./
       - name: Upload Release Asset
         id: upload-release-asset 
         uses: actions/upload-release-asset@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
-          upload_url: ${{ steps.create_release.outputs.upload_url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
+          upload_url: ${{ steps.link.outputs.url }} # This pulls from the CREATE RELEASE step above, referencing it's ID to get its outputs object, which include a `upload_url`. See this blog post for more info: https://jasonet.co/posts/new-features-of-github-actions/#passing-data-to-future-steps 
           asset_path: ./oscTest.exe
-          asset_name: debugger${{ matrix.arch }}.exe
+          asset_name: debugger_${{ matrix.arch }}cp${{ steps.py.outputs.version }}.exe
           asset_content_type: application/octet-stream
