@@ -8,3 +8,4 @@
 !/.github/
 /.github/workflows/*.yml
 !.github/workflows/build.yml
+!.github/workflows/test.yml
