@@ -1,9 +1,9 @@
 from datParser import parse
-from o3dModel import Model
+from o3d.o3dModel import Model
 
 class Models:
     def __init__(self) -> None:
-        self.lods:dict[float,list[Model]]={}
+        self.lods:dict[float,list['Model']]={}
     def loadModels(self,filename:str):
         with open(filename,'r') as file:
             tokens=parse(file)

@@ -41,8 +41,7 @@ class Bus(object):
         if i.type!=3:
             print("expected path to model",str(i))
             return
-        
-        #self.models.loadModels(self.path+os.path.sep+i.string)
+        #self.models.loadModels(os.path.normpath(os.path.join(self.path,os.path.sep+i.string)))
     def _script(self,tokens:Generator[Token,None,None]):
         i=next(tokens)
         if i.type!=2:

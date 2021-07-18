@@ -62,6 +62,11 @@ jobs:
     steps:
       - name: Download project
         uses: actions/checkout@v2
+      - name: Download o3dmodel lib
+        uses: actions/checkout@v2
+        with:
+          repository: dmitrol205/o3dConverter
+          path: o3d
       - name: Set up Python 3.6.x
         uses: actions/setup-python@v2
         with:
