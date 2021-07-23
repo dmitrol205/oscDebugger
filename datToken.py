@@ -97,6 +97,8 @@ class Token:
         'sinus':98,
         'rail_body_osc':99,
         'contact_shoe':100,
+        'char':101,
+        'newfont':102,
     }
     revkeywords={v:k for k,v in keywords.items()}
     tags={
